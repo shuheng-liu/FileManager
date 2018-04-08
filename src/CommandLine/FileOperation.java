@@ -67,7 +67,6 @@ public class FileOperation {
             dirName = currentDir;
         }
         File dir = new File(interpretPath(dirName));
-//        return dir.li stFiles( (File file) -> !file.getName().startsWith(".") ); // using lambda expression
         return dir.listFiles((file) -> !file.isHidden());
     }
 
