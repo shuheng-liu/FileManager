@@ -1,9 +1,6 @@
 package CommandLine;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.Reader;
+import java.io.*;
 import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.NotDirectoryException;
 
@@ -16,7 +13,12 @@ public class FileOperation {
     }
 
     public static void main(String[] args) {
-        // TODO test each method above
+        // TODO test each method
+//        try {
+//            copy(System.in, new FileOutputStream("/Users/liushuheng/desktop/a.txt"));
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
         FileOperation op = new FileOperation(".");
         System.out.println(op.pwd());
         File[] files = op.ls("src/CommandLine");
@@ -28,7 +30,7 @@ public class FileOperation {
             System.out.println(info);
         }
 //        op.cd("/Users/liushuheng/");
-//        System.out.println(op.pwd());
+//        System.out.println(op.pwd());c
 //        System.out.print(op.cat(".inputrc"));
 //        op.mkdir("/Users/liushuheng/Desktop/foo");
         if (!op.mkdir("foo")) {
@@ -40,8 +42,7 @@ public class FileOperation {
         System.out.println(op.rm("foo/bar") ? "Deleted" : "Not Deleted");
         System.out.println(op.rm("foo") ? "Deleted" : "Not Deleted");
 
-//        System.out.println(op.pwd());
-
+        System.out.println(op.pwd());
     }
 
     private String interpretPath(String path) {
@@ -70,23 +71,51 @@ public class FileOperation {
         return dir.listFiles((file) -> !file.isHidden());
     }
 
-    public void cp() {
+    private static void copy(InputStream in, OutputStream out) throws IOException {
+        byte b[] = new byte[1024 * 1024];
+        int len = in.read(b);
+        while (len != -1) {
+            out.write(b, 0, len);
+            len = in.read(b);
+        }
+        in.close();
+        out.close();
     }
 
-    public String cat(String fileName) {
+    public void cp(String src, String dest) throws FileNotFoundException {
+//        Input Stream --> Output Stream (byte)
+//        reader <--> writer (char)
+        InputStream in = new FileInputStream(src);
+        OutputStream out = new FileOutputStream(dest);
         try {
-            File file = new File(interpretPath(fileName));
-            Reader reader = new FileReader(file);
-            StringBuffer buffer = new StringBuffer();
-            int c = reader.read();
-            while (c != -1) {
-                buffer.append((char) c);
-                c = reader.read();
-            }
-            return buffer.toString();
+            copy(in, out);
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public String cat(String fileName) throws FileNotFoundException {
+        InputStream in;
+        try {
+            in = new FileInputStream(new File(interpretPath(fileName)));
+            copy(in, System.out);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+//        try {
+//            File file = new File(interpretPath(fileName));
+//            Reader reader = new FileReader(file);
+//            StringBuffer buffer = new StringBuffer();
+//            int c = reader.read();
+//            while (c != -1) {
+//                buffer.append((char) c);
+//                c = reader.read();
+//            }
+//            return buffer.toString();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
         return "";
     }
 
