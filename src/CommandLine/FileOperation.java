@@ -68,7 +68,7 @@ public class FileOperation {
         this.currentDir = currentDir;
     }
 
-    private File[] ls(String dirName) {
+    File[] ls(String dirName) {
         if (dirName == null) { // fall back to default
             dirName = currentDir;
         }
@@ -76,7 +76,7 @@ public class FileOperation {
         return dir.listFiles((file) -> !file.isHidden());
     }
 
-    private File[] ls() {
+    File[] ls() {
         File dir = new File(currentDir);
         return dir.listFiles((file) -> !file.isHidden());
     }
@@ -92,7 +92,7 @@ public class FileOperation {
         out.close();
     }
 
-    private void cp(String src, String dest) throws FileNotFoundException {
+    void cp(String src, String dest) throws FileNotFoundException {
 //        Input Stream --> Output Stream (byte)
 //        reader <--> writer (char)
         InputStream in = new FileInputStream(src);
@@ -104,7 +104,7 @@ public class FileOperation {
         }
     }
 
-    private String cat(String fileName) {
+    String cat(String fileName) {
 //        InputStream in;
 //        try {
 //            in = new FileInputStream(new File(interpretPath(fileName)));
@@ -129,7 +129,7 @@ public class FileOperation {
         return "";
     }
 
-    private boolean mkdir(String dirName) {
+    boolean mkdir(String dirName) {
         File dir = new File(interpretPath(dirName));
         boolean success = false;
         try {
@@ -144,11 +144,11 @@ public class FileOperation {
         return success;
     }
 
-    private boolean rm(String path) {
+    boolean rm(String path) {
         return new File(interpretPath(path)).delete();
     }
 
-    private String pwd() {
+    String pwd() {
         String dir;
         File f = new File(currentDir);
         try {
@@ -160,7 +160,7 @@ public class FileOperation {
         return dir;
     }
 
-    private void cd(String dir) {
+    void cd(String dir) {
         File f = new File(interpretPath(dir));
         try {
             if (f.isDirectory()) {
