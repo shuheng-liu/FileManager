@@ -9,7 +9,12 @@ public class FileOperation {
     private String currentDir;
 
     public FileOperation(String currentDir) {
-        this.currentDir = currentDir;
+        try {
+            this.currentDir = new File(currentDir).getCanonicalPath();
+        } catch (IOException e) {
+            e.printStackTrace();
+            this.currentDir = "/";
+        }
     }
 
     public static void main(String[] args) {
@@ -99,7 +104,7 @@ public class FileOperation {
         }
     }
 
-    private String cat(String fileName) throws FileNotFoundException {
+    private String cat(String fileName) {
 //        InputStream in;
 //        try {
 //            in = new FileInputStream(new File(interpretPath(fileName)));
