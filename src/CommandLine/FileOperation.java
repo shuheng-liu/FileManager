@@ -63,11 +63,16 @@ public class FileOperation {
         this.currentDir = currentDir;
     }
 
-    public File[] ls(String dirName) {
+    private File[] ls(String dirName) {
         if (dirName == null) { // fall back to default
             dirName = currentDir;
         }
         File dir = new File(interpretPath(dirName));
+        return dir.listFiles((file) -> !file.isHidden());
+    }
+
+    private File[] ls() {
+        File dir = new File(currentDir);
         return dir.listFiles((file) -> !file.isHidden());
     }
 
@@ -82,7 +87,7 @@ public class FileOperation {
         out.close();
     }
 
-    public void cp(String src, String dest) throws FileNotFoundException {
+    private void cp(String src, String dest) throws FileNotFoundException {
 //        Input Stream --> Output Stream (byte)
 //        reader <--> writer (char)
         InputStream in = new FileInputStream(src);
@@ -94,32 +99,32 @@ public class FileOperation {
         }
     }
 
-    public String cat(String fileName) throws FileNotFoundException {
-        InputStream in;
-        try {
-            in = new FileInputStream(new File(interpretPath(fileName)));
-            copy(in, System.out);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
+    private String cat(String fileName) throws FileNotFoundException {
+//        InputStream in;
 //        try {
-//            File file = new File(interpretPath(fileName));
-//            Reader reader = new FileReader(file);
-//            StringBuffer buffer = new StringBuffer();
-//            int c = reader.read();
-//            while (c != -1) {
-//                buffer.append((char) c);
-//                c = reader.read();
-//            }
-//            return buffer.toString();
+//            in = new FileInputStream(new File(interpretPath(fileName)));
+//            copy(in, System.out);
 //        } catch (IOException e) {
 //            e.printStackTrace();
 //        }
+
+        try {
+            File file = new File(interpretPath(fileName));
+            Reader reader = new FileReader(file);
+            StringBuffer buffer = new StringBuffer();
+            int c = reader.read();
+            while (c != -1) {
+                buffer.append((char) c);
+                c = reader.read();
+            }
+            return buffer.toString();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return "";
     }
 
-    public boolean mkdir(String dirName) {
+    private boolean mkdir(String dirName) {
         File dir = new File(interpretPath(dirName));
         boolean success = false;
         try {
@@ -134,11 +139,11 @@ public class FileOperation {
         return success;
     }
 
-    public boolean rm(String path) {
+    private boolean rm(String path) {
         return new File(interpretPath(path)).delete();
     }
 
-    public String pwd() {
+    private String pwd() {
         String dir;
         File f = new File(currentDir);
         try {
@@ -150,7 +155,7 @@ public class FileOperation {
         return dir;
     }
 
-    public void cd(String dir) {
+    private void cd(String dir) {
         File f = new File(interpretPath(dir));
         try {
             if (f.isDirectory()) {
