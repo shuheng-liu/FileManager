@@ -15,7 +15,7 @@ public class Console {
         while (true) {
             System.out.print("prompt> ");
             String command = scanner.nextLine();
-            if (command.trim().isEmpty()) {
+            if (command.trim().isEmpty()) { // if got a blank line
                 continue;
             }
             String str[] = splitCommand(command);
@@ -77,29 +77,30 @@ public class Console {
         int head = 0;
         int tail = 0;
         while (head < roughSegments.length && tail < roughSegments.length) {
-            // TODO set tail, since head is already set before each iteration
+            // only set tail, since head is already set before each iteration
             while (roughSegments[tail].endsWith("\\") && tail + 1 < roughSegments.length) {
                 tail++;
             }
 
-            // TODO append new element in segments
+            // append new element in segments
             segments.add(joinPath(roughSegments, head, tail + 1));
 
-            // TODO set new head and tail for the next iteration
+            // set new head and tail for the next iteration
             head = ++tail;
         }
         return segments.toArray(new String[segments.size()]);
     }
 
     private static void ls(FileOperation op, String[] str) {
-        File[] files = null;
-        if (str.length == 1) {
-            files = op.ls();
-        } else {
-            // TODO further consider the scenario where spaces exist in path
-            files = op.ls(joinPath(str));
+        try {
+            if (str.length > 2) {
+                throw new ArgumentNumberException(1, str.length - 1);
+            }
+        } catch (ArgumentNumberException e) {
+            e.printStackTrace();
         }
-        for (File file : files) {
+        String dirName = (str.length == 1) ? null : str[1];
+        for (File file : op.ls(dirName)) {
             System.out.println(new FileInfo(file));
         }
     }
