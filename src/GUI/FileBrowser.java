@@ -305,7 +305,7 @@ public class FileBrowser {
                 System.out.println("encrypting file" + currentFile.getPath());
                 if (currentFile.isDirectory()) {
                     System.out.println("Selection is not a File");
-                    if (!copySrc.isDirectory()) {
+                    if (copySrc.isDirectory()) {
                         System.out.println("copySrc is neither a File");
                         System.out.println("Aborting");
                         return;
@@ -333,7 +333,7 @@ public class FileBrowser {
                 String dest;
                 if (currentFile.isDirectory()) {
                     System.out.println("Selection is not a File");
-                    if (!copySrc.isDirectory()) {
+                    if (copySrc.isDirectory()) {
                         System.out.println("copySrc is neither a File");
                         System.out.println("Aborting");
                         return;
