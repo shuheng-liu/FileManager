@@ -281,7 +281,7 @@ public class FileBrowser {
         });
         toolBar.add(pasteFile);
 
-        // TODO debug the mkdir button
+        // mkdir button debugged
         JButton mkdir = new JButton("mkdir");
         mkdir.addActionListener(new ActionListener() {
             @Override
@@ -295,7 +295,7 @@ public class FileBrowser {
         });
         toolBar.add(mkdir);
 
-        // encrypt button
+        // encrypt button debugged
         JButton encryptFile = new JButton("encrypt");
         encryptFile.addActionListener(new ActionListener() {
             @Override
@@ -323,7 +323,7 @@ public class FileBrowser {
         });
         toolBar.add(encryptFile);
 
-        // the decrypt button
+        // decrypt button debugged
         JButton decryptFile = new JButton("decrypt");
         decryptFile.addActionListener(new ActionListener() {
             @Override
@@ -351,7 +351,7 @@ public class FileBrowser {
         });
         toolBar.add(decryptFile);
 
-        // the zip button
+        // zip button debugged
         JButton zipFile = new JButton("zip");
         zipFile.addActionListener(new ActionListener() {
             @Override
@@ -379,7 +379,7 @@ public class FileBrowser {
         });
         toolBar.add(zipFile);
 
-        // TODO further optimize the behaviour fo the unzip button
+        // TODO further optimize the behaviour of the unzip button
         JButton unzipFile = new JButton("unzip");
         unzipFile.addActionListener(new ActionListener() {
             @Override
@@ -407,6 +407,26 @@ public class FileBrowser {
         });
         toolBar.add(unzipFile);
 
+        JButton deleteFile = new JButton("delete");
+        deleteFile.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("deleting file" + currentFile.getPath());
+                if (currentFile.isDirectory() && currentFile.list().length != 0) {
+                    System.out.println("The directory " + currentFile.getPath() + " is not empty");
+                    System.out.println("Aborting");
+                    return;
+                }
+                if (op.rm(currentFile.getPath())) {
+                    System.out.println("Successfully deleted " + currentFile.getPath());
+                } else {
+                    System.out.println("Failed to delete " + currentFile.getPath());
+                }
+                refreshTable();
+            }
+        });
+        toolBar.add(deleteFile);
+
         // Check the actions are supported on this platform!
         openFile.setEnabled(desktop.isSupported(Desktop.Action.OPEN));
         editFile.setEnabled(desktop.isSupported(Desktop.Action.EDIT));
@@ -418,6 +438,7 @@ public class FileBrowser {
         decryptFile.setEnabled(true);
         zipFile.setEnabled(true);
         unzipFile.setEnabled(true);
+        deleteFile.setEnabled(true);
 
         flags.add(new JLabel("::  Flags"));
         readable = new JCheckBox("Read  ");
@@ -520,10 +541,6 @@ public class FileBrowser {
         tableColumn.setMinWidth(width);
     }
 
-    /**
-     * Add the files that are contained within the directory of this node.
-     * Thanks to Hovercraft Full Of Eels for the SwingWorker fix.
-     */
     private void showChildren(final DefaultMutableTreeNode node) {
         tree.setEnabled(false);
         progressBar.setVisible(true);
