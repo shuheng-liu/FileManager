@@ -1,4 +1,4 @@
-package CommandLine;
+package CLI;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -19,6 +19,10 @@ public class FileInfo {
     }
 
     public FileInfo() {
+        this.name = "";
+        this.permission = "";
+        this.date = "";
+        this.isDir = false;
     }
 
     public FileInfo(File f) {

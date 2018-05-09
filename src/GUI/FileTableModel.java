@@ -10,18 +10,7 @@ class FileTableModel extends AbstractTableModel {
 
     private File[] files;
     private FileSystemView fileSystemView = FileSystemView.getFileSystemView();
-    private String[] columns = {
-            "Icon",
-            "File",
-            "Path/name",
-            "Size",
-            "Last Modified",
-            "R",
-            "W",
-            "E",
-            "D",
-            "F",
-    };
+    private String[] columns = {"Icon", "File", "Path/name", "Size", "Last Modified", "R", "W", "E", "D", "F",};
 
     FileTableModel() {
         this(new File[0]);

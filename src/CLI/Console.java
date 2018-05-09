@@ -1,7 +1,7 @@
-package CommandLine;
+package CLI;
 
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -10,7 +10,7 @@ import java.util.Scanner;
 public class Console {
     public static void main(String[] args) {
         System.out.println("Welcome to use the File Management Program");
-        FileOperation op = new FileOperation(".");
+        BaseFileOperation op = new BaseFileOperation(".");
         Scanner scanner = new Scanner(System.in);
         while (true) {
             System.out.print("prompt> ");
@@ -42,7 +42,7 @@ public class Console {
                     pwd(op);
                     break;
                 case "exit":
-                    System.out.println("File Opeartion exited");
+                    System.out.println("File Operation exited");
                     return;
                 default:
                     System.out.println("File Operation: " + str[0] + " - command not found");
@@ -91,7 +91,7 @@ public class Console {
         return segments.toArray(new String[segments.size()]);
     }
 
-    private static void ls(FileOperation op, String[] str) {
+    private static void ls(BaseFileOperation op, String[] str) {
         try {
             if (str.length > 2) {
                 throw new ArgumentNumberException(1, str.length - 1);
@@ -105,18 +105,18 @@ public class Console {
         }
     }
 
-    private static void cp(FileOperation op, String[] str) {
+    private static void cp(BaseFileOperation op, String[] str) {
         try {
             if (str.length != 3) {
                 throw new ArgumentNumberException(2, str.length - 1);
             }
             op.cp(str[1], str[2]);
-        } catch (ArgumentNumberException | FileNotFoundException e) {
+        } catch (ArgumentNumberException | IOException e) {
             e.printStackTrace();
         }
     }
 
-    private static void rm(FileOperation op, String[] str) {
+    private static void rm(BaseFileOperation op, String[] str) {
         for (int i = 1; i < str.length; i++) {
             if (!op.rm(str[i])) {
                 System.out.println("Failed to remove " + str[i]);
@@ -124,7 +124,7 @@ public class Console {
         }
     }
 
-    private static void cd(FileOperation op, String[] str) {
+    private static void cd(BaseFileOperation op, String[] str) {
         try {
             if (str.length != 2) {
                 throw new ArgumentNumberException(1, str.length - 1);
@@ -135,19 +135,20 @@ public class Console {
         op.cd(str[1]);
     }
 
-    private static void cat(FileOperation op, String[] str) {
+    private static void cat(BaseFileOperation op, String[] str) {
         for (int i = 1; i < str.length; i++) {
             System.out.println(op.cat(str[i]));
         }
     }
 
-    private static void mkdir(FileOperation op, String[] str) {
+    private static void mkdir(BaseFileOperation op, String[] str) {
         for (int i = 1; i < str.length; i++) {
             op.mkdir(str[i]);
         }
     }
 
-    private static void pwd(FileOperation op) {
+    private static void pwd(BaseFileOperation op) {
         System.out.println(op.pwd());
     }
+
 }

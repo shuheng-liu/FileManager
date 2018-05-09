@@ -2,8 +2,8 @@ package GUI;
 
 import javax.swing.*;
 
-public class FileWindow extends JFrame {
-    public FileWindow() {
+public class FileBrowserWindow extends JFrame {
+    public FileBrowserWindow() {
         super();
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         FileBrowser fileBrowser = new FileBrowser();
@@ -17,6 +17,6 @@ public class FileWindow extends JFrame {
 
 
     public static void main(String[] args) {
-        FileWindow fw = new FileWindow();
+        FileBrowserWindow fw = new FileBrowserWindow();
     }
 }

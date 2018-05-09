@@ -1,4 +1,4 @@
-package CommandLine;
+package CLI;
 
 public class ArgumentNumberException extends Exception {
     public ArgumentNumberException(int expected, int got) {

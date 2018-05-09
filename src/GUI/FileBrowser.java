@@ -1,8 +1,9 @@
 package GUI;
 
+import CLI.BaseFileOperation;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
@@ -10,11 +11,11 @@ import javax.swing.filechooser.FileSystemView;
 import javax.swing.table.TableColumn;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 
@@ -36,6 +37,8 @@ public class FileBrowser {
      * currently selected File.
      */
     private File currentFile;
+    private File copySrc;
+    private BaseFileOperation op;
 
     /**
      * Main GUI container
@@ -46,7 +49,7 @@ public class FileBrowser {
      * File-system tree. Built Lazily
      */
     private JTree tree;
-    private DefaultTreeModel treeModel;
+    private DefaultMutableTreeNode lastSelectedNode;
 
     /**
      * Directory listing
@@ -61,11 +64,6 @@ public class FileBrowser {
     private boolean cellSizesSet = false;
     private int rowIconPadding = 6;
 
-    /* File controls. */
-    private JButton openFile;
-    private JButton printFile;
-    private JButton editFile;
-
     /* File details. */
     private JLabel fileName;
     private JTextField path;
@@ -77,16 +75,29 @@ public class FileBrowser {
     private JRadioButton isDirectory;
     private JRadioButton isFile;
 
-    /* GUI options/containers for new File/Directory creation.  Created lazily. */
-    private JPanel newFilePanel;
-    private JRadioButton newTypeFile;
-    private JTextField name;
+    public FileBrowser() {
+        fileSystemView = FileSystemView.getFileSystemView();
+        desktop = Desktop.getDesktop();
+        setTable();
+        op = new BaseFileOperation("/");
+
+        createUIComponents();
+    }
+
+    private void setTable() {
+        table = new JTable();
+        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        table.setAutoCreateRowSorter(true);
+        table.setShowVerticalLines(false);
+
+        listSelectionListener = lse -> {
+            int row = table.getSelectionModel().getLeadSelectionIndex();
+            setFileDetails(((FileTableModel) table.getModel()).getFile(row));
+        };
+        table.getSelectionModel().addListSelectionListener(listSelectionListener);
+    }
 
     public Container getGUI() {
-        if (gui == null) {
-            createUIComponents();
-
-        }
         return gui;
     }
 
@@ -94,24 +105,10 @@ public class FileBrowser {
         gui = new JPanel(new BorderLayout(3, 3));
         gui.setBorder(new EmptyBorder(5, 5, 5, 5));
 
-        fileSystemView = FileSystemView.getFileSystemView();
-        desktop = Desktop.getDesktop();
 
         JPanel detailView = new JPanel(new BorderLayout(3, 3));
 
-        table = new JTable();
-        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        table.setAutoCreateRowSorter(true);
-        table.setShowVerticalLines(false);
 
-        listSelectionListener = new ListSelectionListener() {
-            @Override
-            public void valueChanged(ListSelectionEvent lse) {
-                int row = table.getSelectionModel().getLeadSelectionIndex();
-                setFileDetails(((FileTableModel) table.getModel()).getFile(row));
-            }
-        };
-        table.getSelectionModel().addListSelectionListener(listSelectionListener);
         JScrollPane tableScroll = new JScrollPane(table);
         Dimension d = tableScroll.getPreferredSize();
         tableScroll.setPreferredSize(new Dimension((int) d.getWidth(), (int) d.getHeight() / 2));
@@ -119,14 +116,12 @@ public class FileBrowser {
 
         // the File tree
         DefaultMutableTreeNode root = new DefaultMutableTreeNode();
-        treeModel = new DefaultTreeModel(root);
+        DefaultTreeModel treeModel = new DefaultTreeModel(root);
 
         TreeSelectionListener treeSelectionListener = new TreeSelectionListener() {
             public void valueChanged(TreeSelectionEvent tse) {
-                DefaultMutableTreeNode node =
-                        (DefaultMutableTreeNode) tse.getPath().getLastPathComponent();
-                showChildren(node);
-                setFileDetails((File) node.getUserObject());
+                lastSelectedNode = (DefaultMutableTreeNode) tse.getPath().getLastPathComponent();
+                refreshTable();
             }
         };
 
@@ -141,7 +136,6 @@ public class FileBrowser {
                     node.add(new DefaultMutableTreeNode(file));
                 }
             }
-            //
         }
 
         tree = new JTree(treeModel);
@@ -152,38 +146,35 @@ public class FileBrowser {
         JScrollPane treeScroll = new JScrollPane(tree);
 
         // as per trashgod tip
-        tree.setVisibleRowCount(15);
+        tree.setVisibleRowCount(20);
 
         Dimension preferredSize = treeScroll.getPreferredSize();
-        Dimension widePreferred = new Dimension(
-                200,
-                (int) preferredSize.getHeight());
+        Dimension widePreferred = new Dimension(200, (int) preferredSize.getHeight());
         treeScroll.setPreferredSize(widePreferred);
 
         // details for a File
         JPanel fileMainDetails = new JPanel(new BorderLayout(4, 2));
         fileMainDetails.setBorder(new EmptyBorder(0, 6, 0, 6));
-
         JPanel fileDetailsLabels = new JPanel(new GridLayout(0, 1, 2, 2));
         fileMainDetails.add(fileDetailsLabels, BorderLayout.WEST);
+        fileDetailsLabels.add(new JLabel("File", JLabel.TRAILING));
+        fileDetailsLabels.add(new JLabel("Path/name", JLabel.TRAILING));
+        fileDetailsLabels.add(new JLabel("Last Modified", JLabel.TRAILING));
+        fileDetailsLabels.add(new JLabel("File size", JLabel.TRAILING));
+        fileDetailsLabels.add(new JLabel("Type", JLabel.TRAILING));
+
 
         JPanel fileDetailsValues = new JPanel(new GridLayout(0, 1, 2, 2));
         fileMainDetails.add(fileDetailsValues, BorderLayout.CENTER);
-
-        fileDetailsLabels.add(new JLabel("File", JLabel.TRAILING));
         fileName = new JLabel();
         fileDetailsValues.add(fileName);
-        fileDetailsLabels.add(new JLabel("Path/name", JLabel.TRAILING));
         path = new JTextField(5);
         path.setEditable(false);
         fileDetailsValues.add(path);
-        fileDetailsLabels.add(new JLabel("Last Modified", JLabel.TRAILING));
         date = new JLabel();
         fileDetailsValues.add(date);
-        fileDetailsLabels.add(new JLabel("File size", JLabel.TRAILING));
         size = new JLabel();
         fileDetailsValues.add(size);
-        fileDetailsLabels.add(new JLabel("Type", JLabel.TRAILING));
 
         JPanel flags = new JPanel(new FlowLayout(FlowLayout.LEADING, 4, 0));
 
@@ -214,9 +205,8 @@ public class FileBrowser {
         });
         toolBar.add(locateFile);
 
-        openFile = new JButton("Open");
-        openFile.setMnemonic('o');
-
+        /* File controls. */
+        JButton openFile = new JButton("Open");
         openFile.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
                 try {
@@ -230,8 +220,7 @@ public class FileBrowser {
         });
         toolBar.add(openFile);
 
-        editFile = new JButton("Edit");
-        editFile.setMnemonic('e');
+        JButton editFile = new JButton("Edit");
         editFile.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
                 try {
@@ -243,8 +232,7 @@ public class FileBrowser {
         });
         toolBar.add(editFile);
 
-        printFile = new JButton("Print");
-        printFile.setMnemonic('p');
+        JButton printFile = new JButton("Print");
         printFile.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
                 try {
@@ -256,10 +244,180 @@ public class FileBrowser {
         });
         toolBar.add(printFile);
 
+        JButton copyFile = new JButton("Copy");
+        copyFile.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                copySrc = currentFile;
+            }
+        });
+        toolBar.add(copyFile);
+
+        JButton pasteFile = new JButton("Paste");
+        pasteFile.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                String dest;
+                // make sure dest is path to a directory
+                try {
+                    if (!currentFile.isDirectory()) {
+                        dest = currentFile.getParent();
+                    } else {
+                        dest = currentFile.getCanonicalPath();
+                    }
+
+                    // make sure dest ends with /
+                    if (!dest.endsWith("/")) {
+                        dest = dest + "/";
+                    }
+                    System.out.printf("copying from %s to %s \n", copySrc.getCanonicalPath(), dest);
+                    op.cp(copySrc.getCanonicalPath(), dest);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                // refresh the table
+                refreshTable();
+            }
+        });
+        toolBar.add(pasteFile);
+
+        // TODO debug the mkdir button
+        JButton mkdir = new JButton("mkdir");
+        mkdir.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                System.out.println("making directory");
+                boolean success = op.autoMakeDir(currentFile.getAbsolutePath());
+                System.out.println("New folder " + (success ? "made" : "not made"));
+                refreshTable();
+                // TODO refresh tree, priority low
+            }
+        });
+        toolBar.add(mkdir);
+
+        // encrypt button
+        JButton encryptFile = new JButton("encrypt");
+        encryptFile.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                String src;
+                String dest;
+                System.out.println("encrypting file" + currentFile.getPath());
+                if (currentFile.isDirectory()) {
+                    System.out.println("Selection is not a File");
+                    if (!copySrc.isDirectory()) {
+                        System.out.println("copySrc is neither a File");
+                        System.out.println("Aborting");
+                        return;
+                    }
+                    System.out.println("Encrypting copySrc");
+                    src = copySrc.getAbsolutePath();
+                    dest = currentFile.getAbsolutePath();
+                } else {
+                    src = currentFile.getAbsolutePath();
+                    dest = currentFile.getParentFile().getAbsolutePath();
+                }
+                op.encrypt(src, dest + "/");
+                refreshTable();
+            }
+        });
+        toolBar.add(encryptFile);
+
+        // the decrypt button
+        JButton decryptFile = new JButton("decrypt");
+        decryptFile.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                System.out.println("decrypting file" + currentFile.getPath());
+                String src;
+                String dest;
+                if (currentFile.isDirectory()) {
+                    System.out.println("Selection is not a File");
+                    if (!copySrc.isDirectory()) {
+                        System.out.println("copySrc is neither a File");
+                        System.out.println("Aborting");
+                        return;
+                    }
+                    System.out.println("Decrypting copySrc");
+                    src = copySrc.getAbsolutePath();
+                    dest = currentFile.getAbsolutePath();
+                } else {
+                    src = currentFile.getAbsolutePath();
+                    dest = currentFile.getParentFile().getAbsolutePath();
+                }
+                op.decrypt(src, dest + "/");
+                refreshTable();
+            }
+        });
+        toolBar.add(decryptFile);
+
+        // the zip button
+        JButton zipFile = new JButton("zip");
+        zipFile.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                System.out.println("zipping file" + currentFile.getPath());
+                String src;
+                String dest;
+                if (!currentFile.isDirectory()) {
+                    System.out.println("Selection is not a Folder");
+                    if (!copySrc.isDirectory()) {
+                        System.out.println("copySrc is neither a Foler");
+                        System.out.println("Aborting");
+                        return;
+                    }
+                    System.out.println("Zipping copySrc");
+                    src = copySrc.getAbsolutePath();
+                    dest = currentFile.getAbsolutePath();
+                } else {
+                    src = currentFile.getAbsolutePath();
+                    dest = currentFile.getParent();
+                }
+                op.zip(src, dest + "/");
+                refreshTable();
+            }
+        });
+        toolBar.add(zipFile);
+
+        // TODO further optimize the behaviour fo the unzip button
+        JButton unzipFile = new JButton("unzip");
+        unzipFile.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                System.out.println("unzipping file" + currentFile.getPath());
+                String src;
+                String dest;
+                if (!currentFile.isFile()) {
+                    System.out.println("Selection is not a zipped file");
+                    if (!copySrc.isFile()) {
+                        System.out.println("copySrc is neither a zipped file");
+                        System.out.println("Aborting");
+                        return;
+                    }
+                    System.out.println("Unzipping copySrc");
+                    src = copySrc.getAbsolutePath();
+                    dest = currentFile.getParent();
+                } else {
+                    src = currentFile.getAbsolutePath();
+                    dest = currentFile.getParent();
+                }
+                op.unzip(src, dest + "/");
+                refreshTable();
+            }
+        });
+        toolBar.add(unzipFile);
+
         // Check the actions are supported on this platform!
         openFile.setEnabled(desktop.isSupported(Desktop.Action.OPEN));
         editFile.setEnabled(desktop.isSupported(Desktop.Action.EDIT));
         printFile.setEnabled(desktop.isSupported(Desktop.Action.PRINT));
+        copyFile.setEnabled(true);
+        pasteFile.setEnabled(true);
+        mkdir.setEnabled(true);
+        encryptFile.setEnabled(true);
+        decryptFile.setEnabled(true);
+        zipFile.setEnabled(true);
+        unzipFile.setEnabled(true);
 
         flags.add(new JLabel("::  Flags"));
         readable = new JCheckBox("Read  ");
@@ -291,10 +449,7 @@ public class FileBrowser {
 
         detailView.add(fileView, BorderLayout.SOUTH);
 
-        JSplitPane splitPane = new JSplitPane(
-                JSplitPane.HORIZONTAL_SPLIT,
-                treeScroll,
-                detailView);
+        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, treeScroll, detailView);
         gui.add(splitPane, BorderLayout.CENTER);
 
         JPanel simpleOutput = new JPanel(new BorderLayout(3, 3));
@@ -302,46 +457,17 @@ public class FileBrowser {
         simpleOutput.add(progressBar, BorderLayout.EAST);
         progressBar.setVisible(false);
 
-//            gui.add(simpleOutput, BorderLayout.SOUTH);
+        gui.add(simpleOutput, BorderLayout.SOUTH);
     }
 
-    public void showRootFile() {
-        // ensure the main files are displayed
-        tree.setSelectionInterval(0, 0);
-    }
-
-    private TreePath findTreePath(File find) {
-        for (int ii = 0; ii < tree.getRowCount(); ii++) {
-            TreePath treePath = tree.getPathForRow(ii);
-            Object object = treePath.getLastPathComponent();
-            DefaultMutableTreeNode node = (DefaultMutableTreeNode) object;
-            File nodeFile = (File) node.getUserObject();
-
-            if (nodeFile == find) {
-                return treePath;
-            }
-        }
-        // not found!
-        return null;
-    }
-
-    private void showErrorMessage(String errorMessage, String errorTitle) {
-        JOptionPane.showMessageDialog(
-                gui,
-                errorMessage,
-                errorTitle,
-                JOptionPane.ERROR_MESSAGE
-        );
+    public void refreshTable() {
+        showChildren(lastSelectedNode);
+        setFileDetails((File) lastSelectedNode.getUserObject());
     }
 
     private void showThrowable(Throwable t) {
         t.printStackTrace();
-        JOptionPane.showMessageDialog(
-                gui,
-                t.toString(),
-                t.getMessage(),
-                JOptionPane.ERROR_MESSAGE
-        );
+        JOptionPane.showMessageDialog(gui, t.toString(), t.getMessage(), JOptionPane.ERROR_MESSAGE);
         gui.repaint();
     }
 
@@ -458,10 +584,7 @@ public class FileBrowser {
 
         JFrame f = (JFrame) gui.getTopLevelAncestor();
         if (f != null) {
-            f.setTitle(
-                    APP_TITLE +
-                            " :: " +
-                            fileSystemView.getSystemDisplayName(file));
+            f.setTitle(APP_TITLE + " :: " + fileSystemView.getSystemDisplayName(file));
         }
 
         gui.repaint();
