@@ -325,7 +325,7 @@ public class BaseFileOperation {
             return autoMakeDir(file.getParentFile());
         }
         // auto-generate names until not conflicting with existent folders/files
-        String newFolderName = file.getAbsolutePath() + "/folder created";
+        String newFolderName = file.getAbsolutePath() + "/untitled folder";
         while (new File(newFolderName).exists()) {
             System.out.println(newFolderName + " exists, try another name");
             newFolderName = newFolderName + " new";
