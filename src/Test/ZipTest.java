@@ -115,6 +115,7 @@ class UnzipFile {
     }
 }
 
+@SuppressWarnings("Duplicates")
 public class ZipTest {
     public static void main(String[] a) throws Exception {
         String original = new String("/Users/liushuheng/Desktop/tmp-folder");
