@@ -1,12 +1,14 @@
 # Java Course Experiment
 
-## Author Info 
+## Author Information
 This is the Course Experiment of Java Programming by Shueheng Liu (Stduent ID 20154625).
 
 ## Attention!!!
-The codes require a Unix (Linux, MacOS) platform to work properly due to file path format limitations. Running the codes on a Windows platform will not yield desired behaviour. 
+The codes require a Unix (Linux, MacOS) platform to work properly due to file path format limitations. 
 
-## Package Content - Brief Intro
+i.e., Running the codes on a Windows platform will not yield desired behaviour. 
+
+## Package Content - Brief Introduction
 File-managing is implemented in both Command Line Interface (see the `CLI` package) and Graphic User Interface (see the `GUI` package)
 
 run the `main(String[])` method of `src/CLI/Console.java` to see the CLI behaviour (Unix Platform required)
@@ -14,27 +16,37 @@ run the `main(String[])` method of `src/CLI/Console.java` to see the CLI behavio
 run the `main(String[])` method of `src/GUI/FileBrowserWindow.java` to see the GUI behaviour (Unix Platform required)
 
 ## Functionality
-copying files/folders (cp) 
+1. copying files/folders (cp) 
 
-deleting files / empty dirs (rm)
+2. deleting files / empty dirs (rm)
 
-creating new directories (mkdir)
+3. creating new directories (mkdir)
 
-viewing files (cat)
+4. viewing files (cat)
 
-changing directory (cd)
+5. changing directory (cd)
 
-pring working directory (pwd)
+6. pring working directory (pwd)
 
-listing directory contents (ls)
+7. listing directory contents (ls)
 
-encrypting files (encrypt)
+8. encrypting files (encrypt)
 
-decrypting files (decrypt)
+9. decrypting files (decrypt)
 
-zipping folders (zip)
+10. zipping folders (zip)
 
-unzipping folders (unzip)
+11. unzipping folders (unzip)
+
+12. reveal file/folder in parent Dir (locate)
+
+13. open file (open)
+
+## Demonstration
+In Video `FileManagerDemo-Compressed.mp4`, the functions of `1.`, `2.`, `3.`, `4.`, `5.`, `6.`, `7.`, `8.`, `9.`, `10.`, and `11.` are demonstrated.
+
+In Video `locate-and-open-binary-files-Compressed.mp4`, the functions of `12.` and `13.` are demonstrated.
+
 
 ## License
  Open Source
