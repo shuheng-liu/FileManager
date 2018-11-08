@@ -3,7 +3,7 @@
 ## Author Information
 This is the Course Experiment of Java Programming by Shueheng Liu (Stduent ID 20154625).
 
-## Attention!!!
+## Attention
 The codes require a Unix (Linux, MacOS) platform to work properly due to file path format limitations. 
 
 i.e., Running the codes on a Windows platform will not yield desired behaviour. 
