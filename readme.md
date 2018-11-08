@@ -15,32 +15,32 @@ run the `main(String[])` method of `src/CLI/Console.java` to see the CLI behavio
 
 run the `main(String[])` method of `src/GUI/FileBrowserWindow.java` to see the GUI behaviour (Unix Platform required)
 
-## Functionality
-1. copying files/folders (cp) 
+## Functionality (with relevant CLI commands)
+1. copying files/folders (`cp`) 
 
-2. deleting files / empty dirs (rm)
+2. deleting files / empty dirs (`rm`)
 
-3. creating new directories (mkdir)
+3. creating new directories (`mkdir`)
 
-4. viewing files (cat)
+4. viewing files (`cat`)
 
-5. changing directory (cd)
+5. changing directory (`cd`)
 
-6. pring working directory (pwd)
+6. pring working directory (`pwd`)
 
-7. listing directory contents (ls)
+7. listing directory contents (`ls`)
 
-8. encrypting files (encrypt)
+8. encrypting files (`encrypt`)
 
-9. decrypting files (decrypt)
+9. decrypting files (`decrypt`)
 
-10. zipping folders (zip)
+10. zipping folders (`zip`)
 
-11. unzipping folders (unzip)
+11. unzipping folders (`unzip`)
 
-12. reveal file/folder in parent Dir (locate)
+12. reveal file/folder in parent Dir (`locate`)
 
-13. open file (open)
+13. open file (`open`)
 
 ## Demonstration
 In Video `FileManagerDemo-Compressed.mp4`, the functions of `1.`, `2.`, `3.`, `4.`, `5.`, `6.`, `7.`, `8.`, `9.`, `10.`, and `11.` are demonstrated.
